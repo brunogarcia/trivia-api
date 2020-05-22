@@ -65,7 +65,7 @@ class Question(db.Model):
         }
 
 
-class Category(db.Model):  
+class Category(db.Model):
     '''
     Category
 
