@@ -19,9 +19,15 @@ class Question extends Component {
       <div className="Question-holder">
         <div className="Question">{question}</div>
         <div className="Question-status">
-          <img className="category" src={`${category}.svg`}/>
+          <img className="category" src={`${category.toLowerCase()}.svg`} alt="category" />
           <div className="difficulty">Difficulty: {difficulty}</div>
-          <img src="delete.png" className="delete" onClick={() => this.props.questionAction('DELETE')}/>
+          <img
+            role="button"
+            alt="delete"
+            src="delete.png"
+            className="delete"
+            onClick={() => this.props.questionAction('DELETE')}
+          />
           
         </div>
         <div className="show-answer button"

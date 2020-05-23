@@ -38,6 +38,12 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
+    """
+    TODO
+    Write at least one test for each test
+    for successful operation and for expected errors.
+    """
+
     def test_retrieve_categories(self):
         """GET categories """
         res = self.client().get('/categories')
@@ -48,11 +54,39 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['categories'])
         self.assertEqual(len(data['categories']), 6)
 
-    """
-    TODO
-    Write at least one test for each test
-    for successful operation and for expected errors.
-    """
+    def test_retrieve_questions(self):
+        """
+        Test retrieve questions
+        """
+        res = self.client().get('/questions?page=1')
+        data = json.loads(res.data)
+
+        # Status code
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+        # Questions
+        self.assertTrue(data['questions'])
+        self.assertEqual(len(data['questions']), 10)
+
+        # Total questions
+        self.assertEqual(data['totalQuestions'], 19)
+
+        # Categories
+        self.assertTrue(data['categories'])
+        self.assertEqual(len(data['categories']), 6)
+        self.assertEqual(data['currentCategory'], None)
+
+    def test_404_sent_requesting_questions_beyond_valid_page(self):
+        '''
+        Test requesting questions beyond valid page
+        '''
+        res = self.client().get('/questions?page=1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
 
 
 # Make the tests conveniently executable

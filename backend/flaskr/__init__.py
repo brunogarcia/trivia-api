@@ -9,14 +9,18 @@ QUESTIONS_PER_PAGE = 10
 
 
 def create_app(test_config=None):
-    # create and configure the app
+    '''
+    Create and configure the app
+    '''
     app = Flask(__name__)
     setup_db(app)
     CORS(app)
 
-    # CORS Headers
     @app.after_request
     def after_request(response):
+        '''
+        CORS Headers
+        '''
         response.headers.add(
           'Access-Control-Allow-Headers', 'Content-Type, Authorization, true'
         )
@@ -41,19 +45,58 @@ def create_app(test_config=None):
         except Exception:
             abort(422)
 
-    '''
-    @TODO:
-    Create an endpoint to handle GET requests for questions,
-    including pagination (every 10 questions).
-    This endpoint should return a list of questions, 
-    number of total questions, current category, categories.
+    @app.route('/questions')
+    def retrieve_questions():
+        '''
+        @TODO:
+        Create an endpoint to handle GET requests for questions,
+        including pagination (every 10 questions).
+        This endpoint should return:
+          - a list of questions
+          - number of total questions
+          - current category
+          - categories
 
-    TEST: At this point, when you start the application
-    you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of
-    the screen for three pages.
-    Clicking on the page numbers should update the questions.
-    '''
+        TEST: At this point, when you start the application
+        you should see questions and categories generated,
+        ten questions per page and pagination at the bottom of
+        the screen for three pages.
+        Clicking on the page numbers should update the questions.
+        '''
+        try:
+            # page
+            page = request.args.get('page', 1, type=int)
+            start = (page - 1) * QUESTIONS_PER_PAGE
+            end = start + QUESTIONS_PER_PAGE
+
+            # questions
+            questions = Question.query.order_by(Question.id).all()
+            questions_formatted = [
+              question.format() for question in questions
+            ]
+            questions_paginated = questions_formatted[start:end]
+
+            # categories
+            categories = Category.query.order_by(Category.id).all()
+            categories_formatted = {
+              category.id: category.type for category in categories
+            }
+
+            if len(questions_paginated) == 0:
+                abort(404)
+
+            return jsonify({
+              'success': True,
+              'questions': questions_paginated,
+              'totalQuestions': len(Question.query.all()),
+              'categories': categories_formatted,
+              'currentCategory': None,
+            })
+        except Exception as e:
+            if '404' in str(e):
+                abort(404)
+            else:
+                abort(422)
 
     '''
     @TODO:
@@ -114,6 +157,14 @@ def create_app(test_config=None):
     Create error handlers for all expected errors
     including 404 and 422.
     '''
+
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "message": "resource not found"
+        }), 404
 
     @app.errorhandler(422)
     def unprocessable(error):
