@@ -40,7 +40,9 @@ def create_app(test_config=None):
 
             return jsonify({
               'success': True,
-              'categories': [category.format() for category in categories]
+              'categories': {
+                category.id: category.type for category in categories
+              }
             })
         except Exception:
             abort(422)
@@ -48,20 +50,8 @@ def create_app(test_config=None):
     @app.route('/questions')
     def retrieve_questions():
         '''
-        @TODO:
-        Create an endpoint to handle GET requests for questions,
+        Endpoint to handle GET requests for questions,
         including pagination (every 10 questions).
-        This endpoint should return:
-          - a list of questions
-          - number of total questions
-          - current category
-          - categories
-
-        TEST: At this point, when you start the application
-        you should see questions and categories generated,
-        ten questions per page and pagination at the bottom of
-        the screen for three pages.
-        Clicking on the page numbers should update the questions.
         '''
         try:
             # page
@@ -98,27 +88,72 @@ def create_app(test_config=None):
             else:
                 abort(422)
 
-    '''
-    @TODO:
-    Create an endpoint to DELETE question using a question ID.
+    @app.route('/questions/<int:question_id>', methods=['DELETE'])
+    def delete_question(question_id):
+        '''
+        Endpoint to DELETE question using a question ID.
 
-    TEST: When you click the trash icon next to a question,
-    the question will be removed.
-    This removal will persist in the database and when
-    you refresh the page.
-    '''
+        TEST: When you click the trash icon next to a question,
+        the question will be removed.
+        This removal will persist in the database and when
+        you refresh the page.
+        '''
+        try:
+            question = Question.query \
+              .filter(Question.id == question_id) \
+              .one_or_none()
 
-    '''
-    @TODO:
-    Create an endpoint to POST a new question,
-    which will require the question and answer text,
-    category, and difficulty score.
+            if question is None:
+                abort(404)
 
-    TEST: When you submit a question on the "Add" tab,
-    the form will clear and the question will
-    appear at the end of the last page
-    of the questions list in the "List" tab.
-    '''
+            question.delete()
+
+            return jsonify({
+              'success': True,
+            })
+        except Exception as e:
+            if '404' in str(e):
+                abort(404)
+            else:
+                abort(422)
+
+    @app.route('/questions', methods=['POST'])
+    def create_question():
+        '''
+        Create an endpoint to POST a new question,
+        which will require the question and answer text,
+        category, and difficulty score.
+
+        TEST: When you submit a question on the "Add" tab,
+        the form will clear and the question will
+        appear at the end of the last page
+        of the questions list in the "List" tab.
+        '''
+        try:
+            # Get raw data
+            body = request.get_json()
+            question = body.get('question', None)
+            answer = body.get('answer', None)
+            difficulty = body.get('difficulty', None)
+            category = body.get('category', None)
+
+            # Create question
+            question = Question(
+              question=question,
+              answer=answer,
+              difficulty=difficulty,
+              category=category
+            )
+
+            # Update db
+            question.insert()
+
+            return jsonify({
+              'success': True,
+              'created': question.id,
+            })
+        except Exception:
+            abort(422)
 
     '''
     @TODO:

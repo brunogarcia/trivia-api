@@ -25,6 +25,14 @@ class TriviaTestCase(unittest.TestCase):
             self.database_name
         )
 
+        self.new_question = {
+            'id': 24,
+            'question': 'test question',
+            'answer': 'test answer',
+            'difficulty': 2,
+            'category': 1,
+        }
+
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -53,6 +61,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertTrue(data['categories'])
         self.assertEqual(len(data['categories']), 6)
+        self.assertIsInstance(data['categories'], dict)
 
     def test_retrieve_questions(self):
         """
@@ -67,6 +76,7 @@ class TriviaTestCase(unittest.TestCase):
 
         # Questions
         self.assertTrue(data['questions'])
+        self.assertIsInstance(data['questions'], list)
         self.assertEqual(len(data['questions']), 10)
 
         # Total questions
@@ -75,6 +85,7 @@ class TriviaTestCase(unittest.TestCase):
         # Categories
         self.assertTrue(data['categories'])
         self.assertEqual(len(data['categories']), 6)
+        self.assertIsInstance(data['categories'], dict)
         self.assertEqual(data['current_category'], None)
 
     def test_404_sent_requesting_questions_beyond_valid_page(self):
@@ -82,6 +93,38 @@ class TriviaTestCase(unittest.TestCase):
         Test requesting questions beyond valid page
         '''
         res = self.client().get('/questions?page=1000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
+    def test_create_question(self):
+        """
+        CREATE question
+        """
+        res = self.client().post('/questions', json=self.new_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['created'], 24)
+
+    def test_delete_question(self):
+        """
+        DELETE question
+        """
+        res = self.client().delete('/questions/24')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_404_send_not_valid_id_for_delete_question(self):
+        """
+        Test send not valid id for delete a question
+        """
+        res = self.client().delete('/questions/1000')
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
