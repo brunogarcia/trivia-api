@@ -70,12 +70,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(len(data['questions']), 10)
 
         # Total questions
-        self.assertEqual(data['totalQuestions'], 19)
+        self.assertEqual(data['total_questions'], 19)
 
         # Categories
         self.assertTrue(data['categories'])
         self.assertEqual(len(data['categories']), 6)
-        self.assertEqual(data['currentCategory'], None)
+        self.assertEqual(data['current_category'], None)
 
     def test_404_sent_requesting_questions_beyond_valid_page(self):
         '''

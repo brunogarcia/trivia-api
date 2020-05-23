@@ -88,9 +88,9 @@ def create_app(test_config=None):
             return jsonify({
               'success': True,
               'questions': questions_paginated,
-              'totalQuestions': len(Question.query.all()),
+              'total_questions': len(Question.query.all()),
               'categories': categories_formatted,
-              'currentCategory': None,
+              'current_category': None,
             })
         except Exception as e:
             if '404' in str(e):
