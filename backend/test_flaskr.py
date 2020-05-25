@@ -166,6 +166,33 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['totalQuestions'], 0)
         self.assertEqual(data['currentCategory'], None)
 
+    def test_get_questions_by_category(self):
+        """
+        Get questions by category
+        """
+        res = self.client().get('/categories/1/questions?page=1')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+        self.assertTrue(data['questions'])
+        self.assertIsInstance(data['questions'], list)
+        self.assertEqual(len(data['questions']), 3)
+        self.assertEqual(data['totalQuestions'], 3)
+        self.assertEqual(data['currentCategory'], 1)
+
+    def test_404_send_category_without_questions(self):
+        """
+        Get category without questions
+        """
+        res = self.client().get('/categories/1000/questions?page=1')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'resource not found')
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

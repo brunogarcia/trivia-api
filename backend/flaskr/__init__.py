@@ -74,14 +74,14 @@ def create_app(test_config=None):
 
             if len(questions_paginated) == 0:
                 abort(404)
-
-            return jsonify({
-              'success': True,
-              'questions': questions_paginated,
-              'total_questions': len(Question.query.all()),
-              'categories': categories_formatted,
-              'current_category': None,
-            })
+            else:
+                return jsonify({
+                  'success': True,
+                  'questions': questions_paginated,
+                  'total_questions': len(Question.query.all()),
+                  'categories': categories_formatted,
+                  'current_category': None,
+                })
         except Exception as e:
             if '404' in str(e):
                 abort(404)
@@ -118,7 +118,7 @@ def create_app(test_config=None):
                 abort(422)
 
     @app.route('/questions', methods=['POST'])
-    def create_question():
+    def create_or_search_question():
         '''
         Endpoint to create a new question
         and get questions based on a search term
@@ -134,6 +134,7 @@ def create_app(test_config=None):
 
         try:
             if search:
+                # Search the term
                 questions = Question.query \
                   .order_by(Question.id) \
                   .filter(Question.question.ilike('%{}%'.format(search)))
@@ -145,8 +146,8 @@ def create_app(test_config=None):
                 return jsonify({
                   'success': True,
                   'questions': questions_formatted,
-                  'totalQuestions': len(questions.all()),
-                  'currentCategory': None,
+                  'total_questions': len(questions.all()),
+                  'current_category': None,
                 })
             else:
                 # Create question
@@ -167,14 +168,43 @@ def create_app(test_config=None):
         except Exception:
             abort(422)
 
-    '''
-    @TODO:
-    Create a GET endpoint to get questions based on category.
+    @app.route('/categories/<int:category_id>/questions', methods=['GET'])
+    def retrieve_questions_by_category(category_id):
+        '''
+        Create a GET endpoint to get questions based on category.
+        '''
+        try:
+            # page
+            page = request.args.get('page', 1, type=int)
+            start = (page - 1) * QUESTIONS_PER_PAGE
+            end = start + QUESTIONS_PER_PAGE
 
-    TEST: In the "List" tab / main screen, clicking on one of the
-    categories in the left column will cause only questions of that
-    category to be shown.
-    '''
+            # questions
+            questions = Question.query \
+                .order_by(Question.id) \
+                .filter(Question.category == category_id) \
+                .all()
+
+            questions_formatted = [
+              question.format() for question in questions
+            ]
+
+            questions_paginated = questions_formatted[start:end]
+
+            if len(questions_paginated) == 0:
+                abort(404)
+            else:
+                return jsonify({
+                  'success': True,
+                  'questions': questions_paginated,
+                  'total_questions': len(questions),
+                  'current_category': category_id
+                })
+        except Exception as e:
+            if '404' in str(e):
+                abort(404)
+            else:
+                abort(422)
 
     '''
     @TODO:

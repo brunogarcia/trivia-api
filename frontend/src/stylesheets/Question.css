@@ -12,6 +12,10 @@
   cursor: pointer;
 }
 
+.categories-list li:hover {
+  color: dodgerblue;
+}
+
 .categories-list > form {
   width: 60%;
 }
