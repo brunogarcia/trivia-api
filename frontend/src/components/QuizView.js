@@ -22,10 +22,13 @@ class QuizView extends Component {
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `/categories`,
       type: "GET",
       success: (result) => {
-        this.setState({ categories: result.categories })
+        this.setState({
+          categories: result.categories
+        })
+
         return;
       },
       error: (error) => {
@@ -45,7 +48,10 @@ class QuizView extends Component {
 
   getNextQuestion = () => {
     const previousQuestions = [...this.state.previousQuestions]
-    if(this.state.currentQuestion.id) { previousQuestions.push(this.state.currentQuestion.id) }
+
+    if(this.state.currentQuestion.id) {
+      previousQuestions.push(this.state.currentQuestion.id)
+    }
 
     $.ajax({
       url: '/quizzes', //TODO: update request URL
