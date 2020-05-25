@@ -146,8 +146,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['questions'])
         self.assertIsInstance(data['questions'], list)
         self.assertEqual(len(data['questions']), 1)
-        self.assertEqual(data['totalQuestions'], 1)
-        self.assertEqual(data['currentCategory'], None)
+        self.assertEqual(data['total_questions'], 1)
+        self.assertEqual(data['current_category'], None)
 
     def test_search_questions_without_results(self):
         """
@@ -163,8 +163,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertIsInstance(data['questions'], list)
         self.assertEqual(len(data['questions']), 0)
-        self.assertEqual(data['totalQuestions'], 0)
-        self.assertEqual(data['currentCategory'], None)
+        self.assertEqual(data['total_questions'], 0)
+        self.assertEqual(data['current_category'], None)
 
     def test_get_questions_by_category(self):
         """
@@ -179,8 +179,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['questions'])
         self.assertIsInstance(data['questions'], list)
         self.assertEqual(len(data['questions']), 3)
-        self.assertEqual(data['totalQuestions'], 3)
-        self.assertEqual(data['currentCategory'], 1)
+        self.assertEqual(data['total_questions'], 3)
+        self.assertEqual(data['current_category'], 1)
 
     def test_404_send_category_without_questions(self):
         """
@@ -192,6 +192,67 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
+
+    def test_quizzes_without_previous_questions(self):
+        """
+        Test quizzes without previous questions
+        for the requested category
+        """
+        res = self.client().post('/quizzes', json={
+            'previous_questions': [],
+            'quiz_category': {
+                'id': '3',
+                'type': 'Geography'
+            }
+        })
+        data = json.loads(res.data)
+
+        # Status code
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['question'])
+        self.assertIsInstance(data['question'], dict)
+
+    def test_quizzes_with_some_previous_questions(self):
+        """
+        Test quizzes with some previous questions
+        for the requested category
+        """
+        res = self.client().post('/quizzes', json={
+            'previous_questions': [13, 14],
+            'quiz_category': {
+                'id': '3',
+                'type': 'Geography'
+            }
+        })
+        data = json.loads(res.data)
+
+        # Status code
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['question'])
+        self.assertIsInstance(data['question'], dict)
+
+    def test_quizzes_with_all_the_previous_questions(self):
+        """
+        Test quizzes with all the previous questions
+        for the requested category
+        """
+        res = self.client().post('/quizzes', json={
+            'previous_questions': [13, 14, 15],
+            'quiz_category': {
+                'id': '3',
+                'type': 'Geography'
+            }
+        })
+        data = json.loads(res.data)
+
+        # Status code
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(data['question'], None)
+
+    # @TODO test all quizzes
 
 
 # Make the tests conveniently executable

@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, Question, Category
+from models import setup_db, db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
 
@@ -206,17 +206,58 @@ def create_app(test_config=None):
             else:
                 abort(422)
 
-    '''
-    @TODO:
-    Create a POST endpoint to get questions to play the quiz.
-    This endpoint should take category and previous question parameters
-    and return a random questions within the given category,
-    if provided, and that is not one of the previous questions.
+    @app.route('/quizzes', methods=['POST'])
+    def retrieve_quizzes():
+        '''
+        @TODO:
+        Create a POST endpoint to get questions to play the quiz.
+        This endpoint should take category and previous question parameters
+        and return a random questions within the given category,
+        if provided, and that is not one of the previous questions.
 
-    TEST: In the "Play" tab, after a user selects "All" or a category,
-    one question at a time is displayed, the user is allowed to answer
-    and shown whether they were correct or not.
-    '''
+        TEST: In the "Play" tab, after a user selects "All" or a category,
+        one question at a time is displayed, the user is allowed to answer
+        and shown whether they were correct or not.
+        '''
+        # Get raw data
+        body = request.get_json()
+        quiz_category = body.get('quiz_category', None)
+        previous_ids = body.get('previous_questions', None)
+        category_id = quiz_category.get('id')
+
+        try:
+            # Get all the questions by the requested category
+            questions = Question.query \
+                .filter(Question.category == category_id) \
+                .all()
+
+            # Create a formatted list of the current questions
+            questions_formatted = [q.format() for q in questions]
+            current_ids = [q.get('id') for q in questions_formatted]
+
+            # Compare both list and create a list of ids
+            ids = list(set(current_ids).difference(previous_ids))
+
+            if len(ids) == 0:
+                # If the list is empty return no question
+                return jsonify({
+                  'success': True,
+                  'question': None
+                })
+            else:
+                # Choice a random id
+                random_id = random.choice(ids)
+
+                # Get the question
+                question = Question.query.get(random_id)
+
+                return jsonify({
+                  'success': True,
+                  'question': question.format()
+                })
+
+        except Exception:
+            abort(422)
 
     '''
     @TODO:
