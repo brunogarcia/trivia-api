@@ -24,7 +24,13 @@ class Search extends Component {
           ref={input => this.search = input}
           onChange={this.handleInputChange}
         />
-        <input type="submit" value="Submit" className="button"/>
+        <button
+          type="submit"
+          className="button"
+          disabled={!this.state.query}
+        >
+          submit
+        </button>
       </form>
     )
   }

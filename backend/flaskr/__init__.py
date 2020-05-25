@@ -30,7 +30,7 @@ def create_app(test_config=None):
 
         return response
 
-    @app.route('/categories')
+    @app.route('/categories', methods=['GET'])
     def retrieve_categories():
         '''
         Endpoint for handle GET requests for all available categories.
@@ -47,7 +47,7 @@ def create_app(test_config=None):
         except Exception:
             abort(422)
 
-    @app.route('/questions')
+    @app.route('/questions', methods=['GET'])
     def retrieve_questions():
         '''
         Endpoint to handle GET requests for questions,
@@ -120,51 +120,52 @@ def create_app(test_config=None):
     @app.route('/questions', methods=['POST'])
     def create_question():
         '''
-        Create an endpoint to POST a new question,
-        which will require the question and answer text,
-        category, and difficulty score.
-
-        TEST: When you submit a question on the "Add" tab,
-        the form will clear and the question will
-        appear at the end of the last page
-        of the questions list in the "List" tab.
+        Endpoint to create a new question
+        and get questions based on a search term
         '''
+
+        # Get raw data
+        body = request.get_json()
+        question = body.get('question', None)
+        answer = body.get('answer', None)
+        difficulty = body.get('difficulty', None)
+        category = body.get('category', None)
+        search = body.get('searchTerm', None)
+
         try:
-            # Get raw data
-            body = request.get_json()
-            question = body.get('question', None)
-            answer = body.get('answer', None)
-            difficulty = body.get('difficulty', None)
-            category = body.get('category', None)
+            if search:
+                questions = Question.query \
+                  .order_by(Question.id) \
+                  .filter(Question.question.ilike('%{}%'.format(search)))
 
-            # Create question
-            question = Question(
-              question=question,
-              answer=answer,
-              difficulty=difficulty,
-              category=category
-            )
+                questions_formatted = [
+                  question.format() for question in questions
+                ]
 
-            # Update db
-            question.insert()
+                return jsonify({
+                  'success': True,
+                  'questions': questions_formatted,
+                  'totalQuestions': len(questions.all()),
+                  'currentCategory': None,
+                })
+            else:
+                # Create question
+                question = Question(
+                  question=question,
+                  answer=answer,
+                  difficulty=difficulty,
+                  category=category
+                )
 
-            return jsonify({
-              'success': True,
-              'created': question.id,
-            })
+                # Update db
+                question.insert()
+
+                return jsonify({
+                  'success': True,
+                  'created': question.id,
+                })
         except Exception:
             abort(422)
-
-    '''
-    @TODO:
-    Create a POST endpoint to get questions based on a search term
-    It should return any questions for whom the search term
-    is a substring of the question.
-
-    TEST: Search by any phrase. The questions list will update to include
-    only question that include that string within their question.
-    Try using the word "title" to start.
-    '''
 
     '''
     @TODO:

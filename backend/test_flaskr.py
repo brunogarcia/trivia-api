@@ -131,6 +131,41 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
+    def test_search_questions(self):
+        """
+        Search questions with results
+        """
+        res = self.client().post(
+            '/questions',
+            json={'searchTerm': 'Taj Mahal'}
+        )
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['questions'])
+        self.assertIsInstance(data['questions'], list)
+        self.assertEqual(len(data['questions']), 1)
+        self.assertEqual(data['totalQuestions'], 1)
+        self.assertEqual(data['currentCategory'], None)
+
+    def test_search_questions_without_results(self):
+        """
+        Search questions without results
+        """
+        res = self.client().post(
+            '/questions',
+            json={'searchTerm': 'aaaaa'}
+        )
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertIsInstance(data['questions'], list)
+        self.assertEqual(len(data['questions']), 0)
+        self.assertEqual(data['totalQuestions'], 0)
+        self.assertEqual(data['currentCategory'], None)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

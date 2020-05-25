@@ -48,7 +48,7 @@ class QuestionView extends Component {
   createPagination(){
     let pageNumbers = [];
     let maxPage = Math.ceil(this.state.totalQuestions / 10)
-    console.log(this.state.totalQuestions);
+
     for (let i = 1; i <= maxPage; i++) {
       pageNumbers.push(
         <span
@@ -84,7 +84,9 @@ class QuestionView extends Component {
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm}),
+      data: JSON.stringify({
+        searchTerm: searchTerm
+      }),
       xhrFields: {
         withCredentials: true
       },
@@ -150,16 +152,20 @@ class QuestionView extends Component {
         <div className="questions-list">
           <h2>Questions</h2>
 
-          {this.state.questions.map((q, ind) => (
-            <Question
-              key={q.id}
-              question={q.question}
-              answer={q.answer}
-              category={this.state.categories[q.category]} 
-              difficulty={q.difficulty}
-              questionAction={this.questionAction(q.id)}
-            />
-          ))}
+          {
+            this.state.questions.length === 0
+              ? 'Sorry, there is not any question.'
+              : this.state.questions.map((q) => (
+                <Question
+                  key={q.id}
+                  question={q.question}
+                  answer={q.answer}
+                  category={this.state.categories[q.category]} 
+                  difficulty={q.difficulty}
+                  questionAction={this.questionAction(q.id)}
+                />
+              ))
+          }
 
           {/* Paginate questions */}
           <div className="pagination-menu">

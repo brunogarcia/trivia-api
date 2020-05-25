@@ -28,6 +28,10 @@
     align-self: center;
 }
 
+.button:disabled {
+    background-color: gray;
+}
+
 div.button {
     margin-top: 20px;
     margin-left: calc(50% - 50px);
