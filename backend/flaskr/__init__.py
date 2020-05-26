@@ -5,7 +5,21 @@ import random
 
 from models import setup_db, db, Question, Category
 
+CATEGORY_ALL = '0'
 QUESTIONS_PER_PAGE = 10
+
+
+def get_ids_from_questions(questions, previous_ids):
+    '''
+    First create a formatted list of the current questions
+    And then compare both list and return a list of ids
+    '''
+    questions_formatted = [q.format() for q in questions]
+    current_ids = [q.get('id') for q in questions_formatted]
+
+    ids = list(set(current_ids).difference(previous_ids))
+
+    return ids
 
 
 def create_app(test_config=None):
@@ -209,8 +223,7 @@ def create_app(test_config=None):
     @app.route('/quizzes', methods=['POST'])
     def retrieve_quizzes():
         '''
-        @TODO:
-        Create a POST endpoint to get questions to play the quiz.
+        Endpoint to get questions to play the quiz.
         This endpoint should take category and previous question parameters
         and return a random questions within the given category,
         if provided, and that is not one of the previous questions.
@@ -220,23 +233,24 @@ def create_app(test_config=None):
         and shown whether they were correct or not.
         '''
         # Get raw data
+        questions = None
         body = request.get_json()
         quiz_category = body.get('quiz_category', None)
         previous_ids = body.get('previous_questions', None)
         category_id = quiz_category.get('id')
 
         try:
-            # Get all the questions by the requested category
-            questions = Question.query \
-                .filter(Question.category == category_id) \
-                .all()
+            if category_id == CATEGORY_ALL:
+                # Get all the questions
+                questions = Question.query.all()
+            else:
+                # Get the questions by the requested category
+                questions = Question.query \
+                    .filter(Question.category == category_id) \
+                    .all()
 
-            # Create a formatted list of the current questions
-            questions_formatted = [q.format() for q in questions]
-            current_ids = [q.get('id') for q in questions_formatted]
-
-            # Compare both list and create a list of ids
-            ids = list(set(current_ids).difference(previous_ids))
+            # Get the list of ids
+            ids = get_ids_from_questions(questions, previous_ids)
 
             if len(ids) == 0:
                 # If the list is empty return no question
@@ -258,12 +272,6 @@ def create_app(test_config=None):
 
         except Exception:
             abort(422)
-
-    '''
-    @TODO:
-    Create error handlers for all expected errors
-    including 404 and 422.
-    '''
 
     @app.errorhandler(404)
     def not_found(error):

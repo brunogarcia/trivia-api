@@ -193,7 +193,26 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
 
-    def test_quizzes_without_previous_questions(self):
+    def test_quizzes_without_category_and_without_previous_questions(self):
+        """
+        Test quizzes without category or previous questions
+        """
+        res = self.client().post('/quizzes', json={
+            'previous_questions': [],
+            'quiz_category': {
+                'id': '0',
+                'type': 'All'
+            }
+        })
+        data = json.loads(res.data)
+
+        # Status code
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertTrue(data['question'])
+        self.assertIsInstance(data['question'], dict)
+
+    def test_quizzes_with_category_and_without_previous_questions(self):
         """
         Test quizzes without previous questions
         for the requested category
@@ -213,7 +232,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['question'])
         self.assertIsInstance(data['question'], dict)
 
-    def test_quizzes_with_some_previous_questions(self):
+    def test_quizzes_with_category_and_with_some_previous_questions(self):
         """
         Test quizzes with some previous questions
         for the requested category
@@ -233,7 +252,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['question'])
         self.assertIsInstance(data['question'], dict)
 
-    def test_quizzes_with_all_the_previous_questions(self):
+    def test_quizzes_with_category_and_with_all_the_previous_questions(self):
         """
         Test quizzes with all the previous questions
         for the requested category
@@ -251,8 +270,6 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(data['question'], None)
-
-    # @TODO test all quizzes
 
 
 # Make the tests conveniently executable
