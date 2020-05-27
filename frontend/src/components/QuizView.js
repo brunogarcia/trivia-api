@@ -85,7 +85,6 @@ class QuizView extends Component {
 
   submitGuess = (event) => {
     event.preventDefault();
-    // const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
     let evaluate =  this.evaluateAnswer()
     this.setState({
       numCorrect: !evaluate ? this.state.numCorrect : this.state.numCorrect + 1,
@@ -110,14 +109,21 @@ class QuizView extends Component {
           <div className="quiz-play-holder">
               <div className="choose-header">Choose Category</div>
               <div className="category-holder">
-                  <div className="play-category" onClick={this.selectCategory}>ALL</div>
+                  <div
+                    className="play-category"
+                    onClick={() => this.selectCategory({ type: 'Asll', id: '0' })}
+                  >
+                    ALL
+                  </div>
+                  
                   {Object.keys(this.state.categories).map(id => {
                   return (
                     <div
                       key={id}
                       value={id}
                       className="play-category"
-                      onClick={() => this.selectCategory({type:this.state.categories[id], id})}>
+                      onClick={() => this.selectCategory({ type: this.state.categories[id], id })}
+                    >
                       {this.state.categories[id]}
                     </div>
                   )
@@ -143,7 +149,6 @@ class QuizView extends Component {
   }
 
   renderCorrectAnswer(){
-    // const formatGuess = this.state.guess.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").toLowerCase()
     let evaluate =  this.evaluateAnswer()
     return(
       <div className="quiz-play-holder">
