@@ -40,17 +40,14 @@ psql trivia < trivia.psql
 
 From within the `backend` directory first ensure you are working using your created virtual environment.
 
-To run the server, execute:
+To run the server, execute the script `run_app.sh`:
 
 ```bash
-export FLASK_APP=flaskr
-export FLASK_ENV=development
-flask run
+# Remember that the script needs execution permission
+chmod +x run_app.sh
+
+./run_app.sh
 ```
-
-Setting the `FLASK_ENV` variable to `development` will detect file changes and restart the server automatically.
-
-Setting the `FLASK_APP` variable to `flaskr` directs flask to use the `flaskr` directory and the `__init__.py` file to find the application. 
 
 ## Tasks
 
@@ -66,35 +63,247 @@ One note before you delve into your tasks: for each endpoint you are expected to
 8. Create a POST endpoint to get questions to play the quiz. This endpoint should take category and previous question parameters and return a random questions within the given category, if provided, and that is not one of the previous questions. 
 9. Create error handlers for all expected errors including 400, 404, 422 and 500. 
 
-REVIEW_COMMENT
+## Endpoints
+
+### GET `/categories`
+- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category.
+- Request arguments: None.
+- Returns:  An object with these keys:
+  - `success`: The success flag
+  - `categories`: Contains a object of `id:category_string` and `key:value pairs`.
+
+```json
+{
+  "success": true,
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  }
+}
 ```
-This README is missing documentation of your endpoints. Below is an example for your endpoint to get all categories. Please use it as a reference for creating your documentation and resubmit your code. 
 
-Endpoints
-GET '/categories'
-GET ...
-POST ...
-DELETE ...
+### GET `/questions`
+- Fetches:
+  - A list of questions (paginated by 10 items)
+  - A dictionary of categories
+  - The total of questions
+  - The current category
+- Request arguments:
+  - `page` (integer) - The current page
+- Returns: An object with these keys:
+  - `success`: The success flag
+  - `questions`: A list of questions (paginated by 10 items)
+  - `categories`: A dictionary of categories
+  - `total_questions`: The total of questions
+  - `current_category`: The current category
 
-GET '/categories'
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, categories, that contains a object of id: category_string key:value pairs. 
-{'1' : "Science",
-'2' : "Art",
-'3' : "Geography",
-'4' : "History",
-'5' : "Entertainment",
-'6' : "Sports"}
-
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+  ],
+  "categories": {
+    "1": "Science",
+    "2": "Art",
+    "3": "Geography",
+    "4": "History",
+    "5": "Entertainment",
+    "6": "Sports"
+  },
+  "total_questions": 10,
+  "current_category": null,
+}
 ```
 
+### DELETE `/questions/:question_id/`
+- Delete question using a question ID
+- Request arguments:
+  - `question_id` (integer): The question id
+- Returns: An object with a single key `success` that contains a `boolean`.
+
+```json
+{
+  "success": true
+}
+```
+
+### POST `/questions`
+- Create a new question.
+- Request arguments:
+  - `question` (string) - The question
+  - `answer` (string) - The answer
+  - `difficulty` (string) - The question difficulty
+  - `category` (string) - The question category
+- Returns: An object with with theses keys `success` that contains a `boolean` and `created` that contains the ID of the question deleted.
+
+```json
+{
+  "success": true,
+  "created": 1,
+}
+```
+
+### POST `/questions`
+- Search a question.
+- Request arguments:
+  - `search` (string) - The term to search
+- Returns: An object with these keys:
+  - `success`: The success flag
+  - `questions`: A list of questions
+  - `total_questions`: The total of questions
+  - `current_category`: The current category
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+  ],
+  "total_questions": 10,
+  "current_category": null,
+}
+```
+
+
+### GET `/categories/:category_id/questions`
+- Fetches a list of questions based on category.
+- Request arguments:
+  - `category_id` (integer): The category id
+- Returns: An object with these keys:
+  - `success`: The success flag
+  - `questions`: A list of questions (paginated by 10 items)
+  - `total_questions`: The total of questions
+  - `current_category`: The current category
+
+```json
+{
+  "success": true,
+  "questions": [
+    {
+      "answer": "Apollo 13",
+      "category": 5,
+      "difficulty": 4,
+      "id": 2,
+      "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+    },
+    {
+      "answer": "Tom Cruise",
+      "category": 5,
+      "difficulty": 4,
+      "id": 4,
+      "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+    },
+  ],
+  "total_questions": 10,
+  "current_category": 1,
+}
+```
+
+### POST `/quizzes`
+- Fetches a question to play the quiz.
+- Request arguments:
+  - `quiz_category` (dictionary): The quiz category with the `type` and the `id`.
+  - `previous_ids` (list of strings): The previous questions ids
+- Returns: An object with these keys:
+  - `success`: The success flag
+  - `question`: The question to play
+
+```json
+{
+  "success": true,
+  "question":{
+    "answer": "Apollo 13",
+    "category": 5,
+    "difficulty": 4,
+    "id": 2,
+    "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+  }
+}
+```
+
+## Errors
+
+### Error 400
+- Returns an object with these keys: `success`, `error` and `message`.
+
+```json
+{
+  "success": false,
+  "error": 400,
+  "message": "bad request"
+}
+```
+
+### Error 404
+- Returns an object with these keys: `success`, `error` and `message`.
+
+```json
+{
+  "success": false,
+  "error": 404,
+  "message": "resource not found"
+}
+```
+
+### Error 422
+- Returns an object with these keys: `success`, `error` and `message`.
+
+```json
+{
+  "success": false,
+  "error": 422,
+  "message": "unprocessable"
+}
+```
+
+### Error 500
+- Returns an object with these keys: `success`, `error` and `message`.
+
+```json
+{
+  "success": false,
+  "error": 500,
+  "message": "internal server error"
+}
+```
 
 ## Testing
-To run the tests, run
-```
-dropdb trivia_test
-createdb trivia_test
-psql trivia_test < trivia.psql
-python test_flaskr.py
+To run the tests, run the script `run_unit_tests.sh`:
+
+```bash
+# Remember that the script needs execution permission
+chmod +x run_unit_tests.sh
+
+./run_unit_tests.sh
 ```
