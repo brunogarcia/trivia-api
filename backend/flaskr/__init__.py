@@ -1,9 +1,8 @@
 from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
-from models import setup_db, db, Question, Category
+from models import setup_db, Question, Category
 
 CATEGORY_ALL = '0'
 QUESTIONS_PER_PAGE = 10
@@ -224,22 +223,16 @@ def create_app(test_config=None):
     def retrieve_quizzes():
         '''
         Endpoint to get questions to play the quiz.
-        This endpoint should take category and previous question parameters
-        and return a random questions within the given category,
-        if provided, and that is not one of the previous questions.
-
-        TEST: In the "Play" tab, after a user selects "All" or a category,
-        one question at a time is displayed, the user is allowed to answer
-        and shown whether they were correct or not.
         '''
-        # Get raw data
-        questions = None
-        body = request.get_json()
-        quiz_category = body.get('quiz_category', None)
-        previous_ids = body.get('previous_questions', None)
-        category_id = quiz_category.get('id')
-
         try:
+            # Get raw data
+            questions = None
+            body = request.get_json()
+            quiz_category = body.get('quiz_category', None)
+            previous_ids = body.get('previous_questions', None)
+            category_id = quiz_category.get('id')
+
+            # Check category
             if category_id == CATEGORY_ALL:
                 # Get all the questions
                 questions = Question.query.all()
