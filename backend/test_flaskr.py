@@ -2,7 +2,7 @@ import unittest
 import json
 from flask_sqlalchemy import SQLAlchemy
 from flaskr import create_app
-from models import setup_db, Question, Category
+from models import setup_db
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -25,6 +25,7 @@ class TriviaTestCase(unittest.TestCase):
             self.database_name
         )
 
+        # new question
         self.new_question = {
             'id': 24,
             'question': 'test question',
@@ -45,12 +46,6 @@ class TriviaTestCase(unittest.TestCase):
     def tearDown(self):
         """Executed after reach test"""
         pass
-
-    """
-    TODO
-    Write at least one test for each test
-    for successful operation and for expected errors.
-    """
 
     def test_retrieve_categories(self):
         """GET categories """
