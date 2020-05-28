@@ -137,11 +137,14 @@ One note before you delve into your tasks: for each endpoint you are expected to
 - Delete question using a question ID
 - Request arguments:
   - `question_id` (integer): The question id
-- Returns: An object with a single key `success` that contains a `boolean`.
+- Returns: An object with theses keys:
+  - `success` that contains a `boolean`.
+  - `deleted` that contains the ID of the question created.
 
 ```json
 {
-  "success": true
+  "success": true,
+  "deleted": 1,
 }
 ```
 
@@ -152,7 +155,9 @@ One note before you delve into your tasks: for each endpoint you are expected to
   - `answer` (string) - The answer
   - `difficulty` (string) - The question difficulty
   - `category` (string) - The question category
-- Returns: An object with with theses keys `success` that contains a `boolean` and `created` that contains the ID of the question deleted.
+- Returns: An object with theses keys:
+  - `success` that contains a `boolean`.
+  - `created` that contains the ID of the question created.
 
 ```json
 {

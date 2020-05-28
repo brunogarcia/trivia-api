@@ -114,6 +114,7 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+        self.assertEqual(data['deleted'], 24)
 
     def test_404_send_not_valid_id_for_delete_question(self):
         """

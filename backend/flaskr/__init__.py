@@ -124,6 +124,7 @@ def create_app(test_config=None):
 
             return jsonify({
               'success': True,
+              'deleted': question_id,
             })
         except Exception as e:
             if '404' in str(e):
