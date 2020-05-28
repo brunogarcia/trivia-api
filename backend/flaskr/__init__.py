@@ -133,10 +133,9 @@ def create_app(test_config=None):
                 abort(422)
 
     @app.route('/questions', methods=['POST'])
-    def create_or_search_question():
+    def create_question():
         '''
         Endpoint to create a new question
-        and get questions based on a search term
         '''
 
         # Get raw data
@@ -145,41 +144,52 @@ def create_app(test_config=None):
         answer = body.get('answer', None)
         difficulty = body.get('difficulty', None)
         category = body.get('category', None)
+
+        try:
+            # Create question
+            question = Question(
+              question=question,
+              answer=answer,
+              difficulty=difficulty,
+              category=category
+            )
+
+            # Update db
+            question.insert()
+
+            return jsonify({
+              'success': True,
+              'created': question.id,
+            })
+        except Exception:
+            abort(422)
+
+    @app.route('/search', methods=['POST'])
+    def search_question():
+        '''
+        Endpoint to search questions based on a term
+        '''
+
+        # Get raw data
+        body = request.get_json()
         search = body.get('searchTerm', None)
 
         try:
-            if search:
-                # Search the term
-                questions = Question.query \
-                  .order_by(Question.id) \
-                  .filter(Question.question.ilike('%{}%'.format(search)))
+            # Search the term
+            questions = Question.query \
+              .order_by(Question.id) \
+              .filter(Question.question.ilike('%{}%'.format(search)))
 
-                questions_formatted = [
-                  question.format() for question in questions
-                ]
+            questions_formatted = [
+              question.format() for question in questions
+            ]
 
-                return jsonify({
-                  'success': True,
-                  'questions': questions_formatted,
-                  'total_questions': len(questions.all()),
-                  'current_category': None,
-                })
-            else:
-                # Create question
-                question = Question(
-                  question=question,
-                  answer=answer,
-                  difficulty=difficulty,
-                  category=category
-                )
-
-                # Update db
-                question.insert()
-
-                return jsonify({
-                  'success': True,
-                  'created': question.id,
-                })
+            return jsonify({
+              'success': True,
+              'questions': questions_formatted,
+              'total_questions': len(questions.all()),
+              'current_category': None,
+            })
         except Exception:
             abort(422)
 

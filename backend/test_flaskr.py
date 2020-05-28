@@ -132,7 +132,7 @@ class TriviaTestCase(unittest.TestCase):
         Search questions with results
         """
         res = self.client().post(
-            '/questions',
+            '/search',
             json={'searchTerm': 'Taj Mahal'}
         )
         data = json.loads(res.data)
@@ -150,7 +150,7 @@ class TriviaTestCase(unittest.TestCase):
         Search questions without results
         """
         res = self.client().post(
-            '/questions',
+            '/search',
             json={'searchTerm': 'aaaaa'}
         )
         data = json.loads(res.data)

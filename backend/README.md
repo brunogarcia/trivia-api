@@ -166,7 +166,7 @@ One note before you delve into your tasks: for each endpoint you are expected to
 }
 ```
 
-### POST `/questions`
+### POST `/search`
 - Search a question.
 - Request arguments:
   - `search` (string) - The term to search
