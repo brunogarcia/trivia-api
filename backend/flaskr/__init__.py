@@ -70,15 +70,15 @@ def create_app(test_config=None):
         try:
             # page
             page = request.args.get('page', 1, type=int)
-            start = (page - 1) * QUESTIONS_PER_PAGE
-            end = start + QUESTIONS_PER_PAGE
 
             # questions
-            questions = Question.query.order_by(Question.id).all()
+            questions = Question.query \
+                .order_by(Question.id) \
+                .paginate(page=page, per_page=QUESTIONS_PER_PAGE)
+
             questions_formatted = [
-              question.format() for question in questions
+              question.format() for question in questions.items
             ]
-            questions_paginated = questions_formatted[start:end]
 
             # categories
             categories = Category.query.order_by(Category.id).all()
@@ -86,13 +86,13 @@ def create_app(test_config=None):
               category.id: category.type for category in categories
             }
 
-            if len(questions_paginated) == 0:
+            if len(questions_formatted) == 0:
                 abort(404)
             else:
                 return jsonify({
                   'success': True,
-                  'questions': questions_paginated,
-                  'total_questions': len(Question.query.all()),
+                  'questions': questions_formatted,
+                  'total_questions': questions.total,
                   'categories': categories_formatted,
                   'current_category': None,
                 })
@@ -190,28 +190,24 @@ def create_app(test_config=None):
         try:
             # page
             page = request.args.get('page', 1, type=int)
-            start = (page - 1) * QUESTIONS_PER_PAGE
-            end = start + QUESTIONS_PER_PAGE
 
             # questions
             questions = Question.query \
                 .order_by(Question.id) \
                 .filter(Question.category == category_id) \
-                .all()
+                .paginate(page=page, per_page=QUESTIONS_PER_PAGE)
 
             questions_formatted = [
-              question.format() for question in questions
+              question.format() for question in questions.items
             ]
 
-            questions_paginated = questions_formatted[start:end]
-
-            if len(questions_paginated) == 0:
+            if len(questions_formatted) == 0:
                 abort(404)
             else:
                 return jsonify({
                   'success': True,
-                  'questions': questions_paginated,
-                  'total_questions': len(questions),
+                  'questions': questions_formatted,
+                  'total_questions': questions.total,
                   'current_category': category_id
                 })
         except Exception as e:
